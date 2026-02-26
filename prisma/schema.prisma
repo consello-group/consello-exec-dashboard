@@ -183,3 +183,46 @@ model ProductivityConfig {
 
   @@map("productivity_config")
 }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Claude Enterprise Analytics (per-user claude.ai engagement)
+// Source: Anthropic Enterprise Analytics API (/v1/organizations/analytics/)
+// Auth: ANTHROPIC_ANALYTICS_KEY (separate from Admin API key)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+model ClaudeAnalyticsSummary {
+  id                 String   @id @default(cuid())
+  date               DateTime @db.Date @unique
+  dailyActiveUsers   Int      @default(0) @map("daily_active_users")
+  weeklyActiveUsers  Int      @default(0) @map("weekly_active_users")
+  monthlyActiveUsers Int      @default(0) @map("monthly_active_users")
+  assignedSeats      Int      @default(0) @map("assigned_seats")
+  pendingInvites     Int      @default(0) @map("pending_invites")
+  syncedAt           DateTime @default(now()) @map("synced_at")
+
+  @@index([date])
+  @@map("claude_analytics_summaries")
+}
+
+model ClaudeUserActivity {
+  id                String   @id @default(cuid())
+  date              DateTime @db.Date
+  anthropicUserId   String   @map("anthropic_user_id")
+  email             String
+  conversationCount Int      @default(0) @map("conversation_count")
+  messageCount      Int      @default(0) @map("message_count")
+  projectsCreated   Int      @default(0) @map("projects_created")
+  projectsUsed      Int      @default(0) @map("projects_used")
+  filesUploaded     Int      @default(0) @map("files_uploaded")
+  artifactsCreated  Int      @default(0) @map("artifacts_created")
+  thinkingMessages  Int      @default(0) @map("thinking_messages")
+  skillsUsed        Int      @default(0) @map("skills_used")
+  connectorsUsed    Int      @default(0) @map("connectors_used")
+  webSearchCount    Int      @default(0) @map("web_search_count")
+  syncedAt          DateTime @default(now()) @map("synced_at")
+
+  @@unique([date, anthropicUserId])
+  @@index([date])
+  @@index([email])
+  @@map("claude_user_activity")
+}

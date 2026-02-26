@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
 import { SyncButton } from "@/components/settings/sync-button";
-import { manualSyncClaude, manualSyncChatGPT, manualSyncHubSpot } from "./actions";
+import { manualSyncClaude, manualSyncChatGPT, manualSyncHubSpot, manualSyncClaudeAnalytics } from "./actions";
 
 // ─── Status indicator dot ─────────────────────────────────────────────────────
 
@@ -81,6 +81,14 @@ export default async function SettingsPage() {
       action: manualSyncHubSpot,
       description: "HubSpot CRM API v3 — deals, contacts, companies",
     },
+    {
+      platform: "claude-analytics",
+      label: "Claude Analytics",
+      envVar: "ANTHROPIC_ANALYTICS_KEY",
+      color: "#d97706",
+      action: manualSyncClaudeAnalytics,
+      description: "Enterprise Analytics API — per-user engagement, DAU/WAU/MAU",
+    },
   ];
 
   // ── Env var status check ──────────────────────────────────────────────────
@@ -88,6 +96,7 @@ export default async function SettingsPage() {
   const envStatus: Record<string, boolean> = {
     OPENAI_ADMIN_KEY: Boolean(process.env.OPENAI_ADMIN_KEY),
     ANTHROPIC_ADMIN_KEY: Boolean(process.env.ANTHROPIC_ADMIN_KEY),
+    ANTHROPIC_ANALYTICS_KEY: Boolean(process.env.ANTHROPIC_ANALYTICS_KEY),
     HUBSPOT_ACCESS_TOKEN: Boolean(process.env.HUBSPOT_ACCESS_TOKEN),
     DATABASE_URL: Boolean(process.env.DATABASE_URL),
     DASHBOARD_PASSWORD: Boolean(process.env.DASHBOARD_PASSWORD),
@@ -322,6 +331,7 @@ export default async function SettingsPage() {
                   { key: "CRON_SECRET", phase: "Core", desc: "Vercel Cron job authorization" },
                   { key: "OPENAI_ADMIN_KEY", phase: "Phase 1", desc: "OpenAI Admin API key (sk-admin-...)" },
                   { key: "ANTHROPIC_ADMIN_KEY", phase: "Phase 1", desc: "Anthropic Admin API key (sk-ant-admin...)" },
+                  { key: "ANTHROPIC_ANALYTICS_KEY", phase: "Phase 1", desc: "Anthropic Analytics API key (claude.ai/analytics/api-keys)" },
                   { key: "HUBSPOT_ACCESS_TOKEN", phase: "Phase 2", desc: "HubSpot Private App access token" },
                   { key: "AZURE_TENANT_ID", phase: "Phase 3", desc: "Azure AD tenant for M365 & Defender" },
                   { key: "AZURE_CLIENT_ID", phase: "Phase 3", desc: "Azure AD app client ID" },
