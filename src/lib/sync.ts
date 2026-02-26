@@ -159,12 +159,13 @@ export async function syncClaude(): Promise<{
   recordCount: number;
   userCount: number;
 }> {
-  // Use yesterday as end date — Anthropic reporting has a ~1 day lag
+  // Use yesterday as end date — Anthropic reporting has a ~1 day lag.
+  // 7-day window: Anthropic's API returns 500 for longer ranges when org has no API usage data.
   const endDateObj = new Date();
   endDateObj.setDate(endDateObj.getDate() - 1);
   const endDate = endDateObj.toISOString().slice(0, 10); // YYYY-MM-DD
   const startDateObj = new Date();
-  startDateObj.setDate(startDateObj.getDate() - 31);
+  startDateObj.setDate(startDateObj.getDate() - 7);
   const startDate = startDateObj.toISOString().slice(0, 10);
 
   // 1. Sync users

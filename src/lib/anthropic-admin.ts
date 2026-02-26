@@ -76,6 +76,7 @@ async function apiFetch<T>(path: string): Promise<T> {
  * Fetch organization usage report for messages in a date range.
  * startDate / endDate should be ISO date strings: "YYYY-MM-DD"
  * Paginates automatically via has_more + next_page cursor.
+ * Returns empty array if the endpoint errors (e.g. no data for the period).
  */
 export async function fetchAnthropicUsage(
   startDate: string,
@@ -87,19 +88,26 @@ export async function fetchAnthropicUsage(
   const startingAt = Math.floor(new Date(startDate + "T00:00:00Z").getTime() / 1000);
   const endingAt = Math.floor(new Date(endDate + "T23:59:59Z").getTime() / 1000);
 
-  do {
-    const params = new URLSearchParams({
-      starting_at: String(startingAt),
-      ending_at: String(endingAt),
-    });
-    if (cursor) params.set("next_page", cursor);
+  try {
+    do {
+      const params = new URLSearchParams({
+        starting_at: String(startingAt),
+        ending_at: String(endingAt),
+      });
+      if (cursor) params.set("next_page", cursor);
 
-    const data = await apiFetch<AnthropicUsagePage>(
-      `/v1/organizations/usage_report/messages?${params.toString()}`
+      const data = await apiFetch<AnthropicUsagePage>(
+        `/v1/organizations/usage_report/messages?${params.toString()}`
+      );
+      records.push(...data.data);
+      cursor = data.has_more ? data.next_page : undefined;
+    } while (cursor);
+  } catch (err) {
+    console.warn(
+      "[anthropic-admin] Usage report fetch failed (returning empty — org may have no API usage data):",
+      err instanceof Error ? err.message : err
     );
-    records.push(...data.data);
-    cursor = data.has_more ? data.next_page : undefined;
-  } while (cursor);
+  }
 
   return records;
 }
@@ -107,6 +115,7 @@ export async function fetchAnthropicUsage(
 /**
  * Fetch organization cost report for a date range.
  * Paginates automatically via has_more + next_page cursor.
+ * Returns empty array if the endpoint errors.
  */
 export async function fetchAnthropicCosts(
   startDate: string,
@@ -118,19 +127,26 @@ export async function fetchAnthropicCosts(
   const startingAt = Math.floor(new Date(startDate + "T00:00:00Z").getTime() / 1000);
   const endingAt = Math.floor(new Date(endDate + "T23:59:59Z").getTime() / 1000);
 
-  do {
-    const params = new URLSearchParams({
-      starting_at: String(startingAt),
-      ending_at: String(endingAt),
-    });
-    if (cursor) params.set("next_page", cursor);
+  try {
+    do {
+      const params = new URLSearchParams({
+        starting_at: String(startingAt),
+        ending_at: String(endingAt),
+      });
+      if (cursor) params.set("next_page", cursor);
 
-    const data = await apiFetch<AnthropicCostPage>(
-      `/v1/organizations/cost_report?${params.toString()}`
+      const data = await apiFetch<AnthropicCostPage>(
+        `/v1/organizations/cost_report?${params.toString()}`
+      );
+      records.push(...data.data);
+      cursor = data.has_more ? data.next_page : undefined;
+    } while (cursor);
+  } catch (err) {
+    console.warn(
+      "[anthropic-admin] Cost report fetch failed (returning empty):",
+      err instanceof Error ? err.message : err
     );
-    records.push(...data.data);
-    cursor = data.has_more ? data.next_page : undefined;
-  } while (cursor);
+  }
 
   return records;
 }
