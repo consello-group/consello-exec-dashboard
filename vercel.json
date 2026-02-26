@@ -1,0 +1,7 @@
+{
+  "crons": [
+    { "path": "/api/sync/chatgpt", "schedule": "0 5 * * *" },
+    { "path": "/api/sync/claude", "schedule": "0 5 * * *" },
+    { "path": "/api/sync/hubspot", "schedule": "0 6 * * *" }
+  ]
+}
