@@ -91,7 +91,6 @@ export async function fetchAnthropicUsage(
     const params = new URLSearchParams({
       starting_at: String(startingAt),
       ending_at: String(endingAt),
-      page_size: "100",
     });
     if (cursor) params.set("next_page", cursor);
 
@@ -123,7 +122,6 @@ export async function fetchAnthropicCosts(
     const params = new URLSearchParams({
       starting_at: String(startingAt),
       ending_at: String(endingAt),
-      page_size: "100",
     });
     if (cursor) params.set("next_page", cursor);
 
