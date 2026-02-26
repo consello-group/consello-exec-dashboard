@@ -5,7 +5,7 @@ import { useState } from "react";
 interface SyncButtonProps {
   platform: string;
   label: string;
-  syncRoute: string;
+  action: () => Promise<{ success: boolean; recordCount?: number; error?: string }>;
   disabled?: boolean;
   accentColor?: string;
 }
@@ -13,9 +13,9 @@ interface SyncButtonProps {
 type SyncState = "idle" | "loading" | "success" | "error";
 
 export function SyncButton({
-  platform,
+  platform: _platform,
   label,
-  syncRoute,
+  action,
   disabled = false,
   accentColor = "#6366f1",
 }: SyncButtonProps) {
@@ -26,20 +26,18 @@ export function SyncButton({
     setState("loading");
     setMessage(null);
     try {
-      const res = await fetch(syncRoute, { method: "POST" });
-      const json = await res.json().catch(() => ({}));
-      if (res.ok) {
+      const result = await action();
+      if (result.success) {
         setState("success");
-        setMessage(json.message ?? `Sync complete`);
+        setMessage(result.recordCount != null ? `${result.recordCount} records synced` : "Sync complete");
       } else {
         setState("error");
-        setMessage(json.error ?? `Sync failed (${res.status})`);
+        setMessage(result.error ?? "Sync failed");
       }
     } catch (err) {
       setState("error");
       setMessage(err instanceof Error ? err.message : "Network error");
     }
-    // Reset after 4 seconds
     setTimeout(() => {
       setState("idle");
       setMessage(null);
@@ -53,8 +51,6 @@ export function SyncButton({
       ? "#052e16"
       : state === "error"
       ? "#450a0a"
-      : disabled
-      ? "#1a1a26"
       : "#1a1a26";
 
   const buttonColor =
@@ -90,24 +86,9 @@ export function SyncButton({
         }}
       >
         {isLoading && (
-          <svg
-            className="animate-spin h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
+          <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
         )}
         {state === "success" && (
@@ -129,10 +110,7 @@ export function SyncButton({
           : `Sync ${label}`}
       </button>
       {message && (
-        <p
-          className="text-xs text-center"
-          style={{ color: state === "error" ? "#ef4444" : "#10a37f" }}
-        >
+        <p className="text-xs text-center" style={{ color: state === "error" ? "#ef4444" : "#10a37f" }}>
           {message}
         </p>
       )}

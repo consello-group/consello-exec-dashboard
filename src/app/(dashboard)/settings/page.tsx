@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
 import { SyncButton } from "@/components/settings/sync-button";
+import { manualSyncClaude, manualSyncChatGPT, manualSyncHubSpot } from "./actions";
 
 // ─── Status indicator dot ─────────────────────────────────────────────────────
 
@@ -61,7 +62,7 @@ export default async function SettingsPage() {
       label: "ChatGPT Enterprise",
       envVar: "OPENAI_ADMIN_KEY",
       color: "#10a37f",
-      syncRoute: "/api/sync/chatgpt",
+      action: manualSyncChatGPT,
       description: "OpenAI Admin API — token usage and costs",
     },
     {
@@ -69,7 +70,7 @@ export default async function SettingsPage() {
       label: "Claude Enterprise",
       envVar: "ANTHROPIC_ADMIN_KEY",
       color: "#d97706",
-      syncRoute: "/api/sync/claude",
+      action: manualSyncClaude,
       description: "Anthropic Admin API — token usage and costs",
     },
     {
@@ -77,7 +78,7 @@ export default async function SettingsPage() {
       label: "HubSpot CRM",
       envVar: "HUBSPOT_ACCESS_TOKEN",
       color: "#ff7a59",
-      syncRoute: "/api/sync/hubspot",
+      action: manualSyncHubSpot,
       description: "HubSpot CRM API v3 — deals, contacts, companies",
     },
   ];
@@ -201,7 +202,7 @@ export default async function SettingsPage() {
                 <SyncButton
                   platform={source.platform}
                   label={source.label}
-                  syncRoute={source.syncRoute}
+                  action={source.action}
                   disabled={!isConfigured}
                   accentColor={source.color}
                 />
