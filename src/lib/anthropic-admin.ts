@@ -4,10 +4,13 @@
  * Auth: ANTHROPIC_ADMIN_KEY env var (sk-ant-admin-...)
  * Base: https://api.anthropic.com
  *
- * Actual API response structure (verified from Anthropic API reference):
- *   usage_report: { data: [{ starting_at, ending_at, results: [{ model, uncached_input_tokens, output_tokens, cache_read_input_tokens, ... }] }] }
- *   cost_report:  { data: [{ starting_at, ending_at, results: [{ amount (cents string), currency, model, description, ... }] }] }
- * Both endpoints accept starting_at/ending_at as RFC 3339 strings and paginate via next_page → page param.
+ * Response structure (verified from Anthropic API reference + spec):
+ *   usage_report: { data: [{ starting_at, ending_at, results: [{ model, input_tokens | uncached_input_tokens, output_tokens, api_key_id, ... }] }] }
+ *   cost_report:  { data: [{ starting_at, ending_at, results: [{ amount (cents string), currency, model, description }] }] }
+ *   api_keys:     { data: [{ id, name, status, workspace_id, created_by: { id, type } }] }
+ *
+ * Per-user tracking: group by api_key_id, then join against api_keys endpoint.
+ * api_key_id = null → "Console / Workbench" usage (not attributed to an API key).
  */
 
 // ─── Public interfaces (consumed by sync.ts) ─────────────────────────────────
@@ -16,7 +19,8 @@ export interface AnthropicUsageRecord {
   start_time: number;
   end_time: number;
   model: string;
-  user_id?: string;
+  api_key_id?: string | null; // null = Workbench/Console usage
+  user_id?: string;           // kept for compatibility; use api_key_id chain instead
   input_tokens: number;
   output_tokens: number;
   request_count: number;
@@ -35,11 +39,23 @@ export interface AnthropicUser {
   name?: string;
 }
 
+export interface AnthropicApiKey {
+  id: string;
+  name: string;
+  status: string;
+  workspace_id: string | null;
+  created_by: { id: string; type: string } | null;
+}
+
 // ─── Internal API response types ─────────────────────────────────────────────
 
 interface UsageResult {
   model: string | null;
-  uncached_input_tokens: number;
+  api_key_id: string | null;
+  // Anthropic uses "uncached_input_tokens" in the API reference,
+  // "input_tokens" in the dev spec — handle both for safety.
+  input_tokens?: number;
+  uncached_input_tokens?: number;
   output_tokens: number;
   cache_read_input_tokens: number;
 }
@@ -81,6 +97,12 @@ interface AnthropicMembersPage {
   next_page?: string;
 }
 
+interface AnthropicApiKeysPage {
+  data: AnthropicApiKey[];
+  has_more: boolean;
+  next_page?: string;
+}
+
 // ─── HTTP helper ─────────────────────────────────────────────────────────────
 
 const BASE = "https://api.anthropic.com";
@@ -114,7 +136,8 @@ async function apiFetch<T>(path: string): Promise<T> {
 /**
  * Fetch organization usage report for messages in a date range.
  * startDate / endDate: ISO date strings "YYYY-MM-DD"
- * Groups by model. Returns empty array on any error.
+ * Groups by model AND api_key_id to support both per-model and per-user views.
+ * Returns empty array on any error.
  */
 export async function fetchAnthropicUsage(
   startDate: string,
@@ -123,7 +146,6 @@ export async function fetchAnthropicUsage(
   const records: AnthropicUsageRecord[] = [];
   let cursor: string | undefined;
 
-  // API requires RFC 3339 format
   const startingAt = startDate + "T00:00:00Z";
   const endingAt = endDate + "T23:59:59Z";
 
@@ -135,6 +157,7 @@ export async function fetchAnthropicUsage(
         bucket_width: "1d",
       });
       params.append("group_by", "model");
+      params.append("group_by", "api_key_id");
       if (cursor) params.set("page", cursor);
 
       const data = await apiFetch<AnthropicUsagePage>(
@@ -146,14 +169,19 @@ export async function fetchAnthropicUsage(
         const endTime = Math.floor(new Date(bucket.ending_at).getTime() / 1000);
 
         for (const result of bucket.results) {
-          if (!result.model) continue;
+          // Spec calls it input_tokens; API reference calls it uncached_input_tokens
+          const inputTokens =
+            (result.input_tokens ?? result.uncached_input_tokens ?? 0) +
+            (result.cache_read_input_tokens ?? 0);
+
           records.push({
             start_time: startTime,
             end_time: endTime,
-            model: result.model,
-            input_tokens: (result.uncached_input_tokens ?? 0) + (result.cache_read_input_tokens ?? 0),
+            model: result.model ?? "unknown",
+            api_key_id: result.api_key_id ?? null,
+            input_tokens: inputTokens,
             output_tokens: result.output_tokens ?? 0,
-            request_count: 0, // not available from usage_report endpoint
+            request_count: 0, // not provided by this endpoint
           });
         }
       }
@@ -162,7 +190,7 @@ export async function fetchAnthropicUsage(
     } while (cursor);
   } catch (err) {
     console.warn(
-      "[anthropic-admin] Usage report fetch failed (returning empty — org may have no API usage data):",
+      "[anthropic-admin] Usage report fetch failed (returning empty):",
       err instanceof Error ? err.message : err
     );
   }
@@ -190,7 +218,6 @@ export async function fetchAnthropicCosts(
       const params = new URLSearchParams({
         starting_at: startingAt,
         ending_at: endingAt,
-        bucket_width: "1d",
       });
       params.append("group_by", "description");
       if (cursor) params.set("page", cursor);
@@ -239,8 +266,8 @@ export async function fetchAnthropicUsers(): Promise<AnthropicUser[]> {
 
   try {
     do {
-      const params = new URLSearchParams({ page_size: "100" });
-      if (cursor) params.set("next_page", cursor);
+      const params = new URLSearchParams({ limit: "100" });
+      if (cursor) params.set("page", cursor);
 
       const data = await apiFetch<AnthropicMembersPage>(
         `/v1/organizations/users?${params.toString()}`
@@ -256,4 +283,34 @@ export async function fetchAnthropicUsers(): Promise<AnthropicUser[]> {
   }
 
   return users;
+}
+
+/**
+ * Fetch all active API keys.
+ * Each key includes created_by.id (Anthropic user ID) for user attribution.
+ * Returns empty array on any error.
+ */
+export async function fetchAnthropicApiKeys(): Promise<AnthropicApiKey[]> {
+  const keys: AnthropicApiKey[] = [];
+  let cursor: string | undefined;
+
+  try {
+    do {
+      const params = new URLSearchParams({ limit: "100", status: "active" });
+      if (cursor) params.set("page", cursor);
+
+      const data = await apiFetch<AnthropicApiKeysPage>(
+        `/v1/organizations/api_keys?${params.toString()}`
+      );
+      keys.push(...data.data);
+      cursor = data.has_more ? data.next_page : undefined;
+    } while (cursor);
+  } catch (err) {
+    console.warn(
+      "[anthropic-admin] Could not fetch API keys (user attribution will be skipped):",
+      err instanceof Error ? err.message : err
+    );
+  }
+
+  return keys;
 }

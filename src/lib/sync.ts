@@ -14,6 +14,7 @@ import {
   fetchAnthropicUsage,
   fetchAnthropicCosts,
   fetchAnthropicUsers,
+  fetchAnthropicApiKeys,
 } from "@/lib/anthropic-admin";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -174,11 +175,23 @@ export async function syncClaude(): Promise<{
     await upsertUser(user.email, user.name ?? null, "claude", user.id);
   }
 
+  // Build lookup: anthropic userId → db User.id (via claudeUserId field)
   const dbUsers = await db.user.findMany({
     where: { claudeUserId: { not: null } },
     select: { id: true, claudeUserId: true },
   });
-  const userMap = new Map(dbUsers.map((u) => [u.claudeUserId!, u.id]));
+  const claudeUserMap = new Map(dbUsers.map((u) => [u.claudeUserId!, u.id]));
+
+  // Fetch API keys and build lookup: api_key_id → db User.id
+  // Per spec: usage is attributed via api_key_id → created_by.id (anthropic userId) → db User
+  const apiKeys = await fetchAnthropicApiKeys();
+  const apiKeyUserMap = new Map<string, string>();
+  for (const key of apiKeys) {
+    if (key.created_by?.id) {
+      const dbUserId = claudeUserMap.get(key.created_by.id);
+      if (dbUserId) apiKeyUserMap.set(key.id, dbUserId);
+    }
+  }
 
   // 2. Sync usage records
   const usageRecords = await fetchAnthropicUsage(startDate, endDate);
@@ -188,7 +201,10 @@ export async function syncClaude(): Promise<{
     const date = new Date(record.start_time * 1000);
     date.setUTCHours(0, 0, 0, 0);
 
-    const userId = record.user_id ? userMap.get(record.user_id) ?? null : null;
+    // Resolve user: api_key_id → db User.id; null api_key_id = Workbench/Console usage
+    const userId = record.api_key_id
+      ? (apiKeyUserMap.get(record.api_key_id) ?? null)
+      : null;
 
     await db.usageRecord.upsert({
       where: {
