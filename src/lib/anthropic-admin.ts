@@ -84,10 +84,13 @@ export async function fetchAnthropicUsage(
   const records: AnthropicUsageRecord[] = [];
   let cursor: string | undefined;
 
+  const startingAt = Math.floor(new Date(startDate + "T00:00:00Z").getTime() / 1000);
+  const endingAt = Math.floor(new Date(endDate + "T23:59:59Z").getTime() / 1000);
+
   do {
     const params = new URLSearchParams({
-      start_date: startDate,
-      end_date: endDate,
+      starting_at: String(startingAt),
+      ending_at: String(endingAt),
       page_size: "100",
     });
     if (cursor) params.set("next_page", cursor);
@@ -113,10 +116,13 @@ export async function fetchAnthropicCosts(
   const records: AnthropicCostRecord[] = [];
   let cursor: string | undefined;
 
+  const startingAt = Math.floor(new Date(startDate + "T00:00:00Z").getTime() / 1000);
+  const endingAt = Math.floor(new Date(endDate + "T23:59:59Z").getTime() / 1000);
+
   do {
     const params = new URLSearchParams({
-      start_date: startDate,
-      end_date: endDate,
+      starting_at: String(startingAt),
+      ending_at: String(endingAt),
       page_size: "100",
     });
     if (cursor) params.set("next_page", cursor);
