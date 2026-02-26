@@ -159,9 +159,12 @@ export async function syncClaude(): Promise<{
   recordCount: number;
   userCount: number;
 }> {
-  const endDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  // Use yesterday as end date — Anthropic reporting has a ~1 day lag
+  const endDateObj = new Date();
+  endDateObj.setDate(endDateObj.getDate() - 1);
+  const endDate = endDateObj.toISOString().slice(0, 10); // YYYY-MM-DD
   const startDateObj = new Date();
-  startDateObj.setDate(startDateObj.getDate() - 30);
+  startDateObj.setDate(startDateObj.getDate() - 31);
   const startDate = startDateObj.toISOString().slice(0, 10);
 
   // 1. Sync users
