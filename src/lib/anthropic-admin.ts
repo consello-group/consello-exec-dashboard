@@ -149,7 +149,7 @@ export async function fetchAnthropicUsers(): Promise<AnthropicUser[]> {
       if (cursor) params.set("next_page", cursor);
 
       const data = await apiFetch<AnthropicMembersPage>(
-        `/v1/organizations/members?${params.toString()}`
+        `/v1/organizations/users?${params.toString()}`
       );
       users.push(...data.data);
       cursor = data.has_more ? data.next_page : undefined;
