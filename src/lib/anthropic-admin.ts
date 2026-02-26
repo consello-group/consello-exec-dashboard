@@ -133,22 +133,27 @@ export async function fetchAnthropicCosts(
 
 /**
  * Fetch all organization members.
- * Paginates automatically via has_more + next_page cursor.
+ * Returns empty array if the endpoint is unavailable (e.g. plan restrictions).
  */
 export async function fetchAnthropicUsers(): Promise<AnthropicUser[]> {
   const users: AnthropicUser[] = [];
   let cursor: string | undefined;
 
-  do {
-    const params = new URLSearchParams({ page_size: "100" });
-    if (cursor) params.set("next_page", cursor);
+  try {
+    do {
+      const params = new URLSearchParams({ page_size: "100" });
+      if (cursor) params.set("next_page", cursor);
 
-    const data = await apiFetch<AnthropicMembersPage>(
-      `/v1/organizations/members?${params.toString()}`
-    );
-    users.push(...data.data);
-    cursor = data.has_more ? data.next_page : undefined;
-  } while (cursor);
+      const data = await apiFetch<AnthropicMembersPage>(
+        `/v1/organizations/members?${params.toString()}`
+      );
+      users.push(...data.data);
+      cursor = data.has_more ? data.next_page : undefined;
+    } while (cursor);
+  } catch (err) {
+    // Members endpoint may not be available on all plans — skip user mapping
+    console.warn("[anthropic-admin] Could not fetch members (usage data will still sync):", err instanceof Error ? err.message : err);
+  }
 
   return users;
 }
