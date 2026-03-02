@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
 import { SyncButton } from "@/components/settings/sync-button";
+import { ChatGPTCsvUpload } from "@/components/settings/csv-upload";
 import { manualSyncClaude, manualSyncChatGPT, manualSyncHubSpot, manualSyncClaudeAnalytics } from "./actions";
 
 // ─── Status indicator dot ─────────────────────────────────────────────────────
@@ -99,7 +100,7 @@ export default async function SettingsPage() {
     ANTHROPIC_ANALYTICS_KEY: Boolean(process.env.ANTHROPIC_ANALYTICS_KEY),
     HUBSPOT_ACCESS_TOKEN: Boolean(process.env.HUBSPOT_ACCESS_TOKEN),
     DATABASE_URL: Boolean(process.env.DATABASE_URL),
-    DASHBOARD_PASSWORD: Boolean(process.env.DASHBOARD_PASSWORD),
+    APP_PASSWORD: Boolean(process.env.APP_PASSWORD),
     CRON_SECRET: Boolean(process.env.CRON_SECRET),
     AZURE_TENANT_ID: Boolean(process.env.AZURE_TENANT_ID),
     AZURE_CLIENT_ID: Boolean(process.env.AZURE_CLIENT_ID),
@@ -221,7 +222,21 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      {/* Section 2: Productivity Configuration */}
+      {/* Section 2: ChatGPT CSV Import */}
+      <section>
+        <SectionHeader
+          title="ChatGPT CSV Import"
+          sub="Upload monthly user report exports from the OpenAI admin portal — covers message counts and model breakdown per user"
+        />
+        <div
+          className="rounded-xl border p-5"
+          style={{ backgroundColor: "#12121a", borderColor: "#2a2a3a" }}
+        >
+          <ChatGPTCsvUpload />
+        </div>
+      </section>
+
+      {/* Section 3: Productivity Configuration */}
       <section>
         <SectionHeader
           title="Productivity Configuration"
@@ -299,7 +314,7 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      {/* Section 3: API Configuration Status */}
+      {/* Section 4: API Configuration Status */}
       <section>
         <SectionHeader
           title="API Configuration Status"
@@ -327,7 +342,7 @@ export default async function SettingsPage() {
               {(
                 [
                   { key: "DATABASE_URL", phase: "Core", desc: "Neon Postgres connection string" },
-                  { key: "DASHBOARD_PASSWORD", phase: "Core", desc: "HTTP Basic Auth password" },
+                  { key: "APP_PASSWORD", phase: "Core", desc: "Shared dashboard password (sessionStorage auth)" },
                   { key: "CRON_SECRET", phase: "Core", desc: "Vercel Cron job authorization" },
                   { key: "OPENAI_ADMIN_KEY", phase: "Phase 1", desc: "OpenAI Admin API key (sk-admin-...)" },
                   { key: "ANTHROPIC_ADMIN_KEY", phase: "Phase 1", desc: "Anthropic Admin API key (sk-ant-admin...)" },
