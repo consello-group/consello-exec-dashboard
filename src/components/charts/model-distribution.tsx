@@ -19,22 +19,22 @@ interface ModelDistributionProps {
   loading?: boolean;
 }
 
-// Green shades for ChatGPT models
+// Terracotta shades for ChatGPT models
 const CHATGPT_COLORS = [
-  "#10a37f",
-  "#0d8a6a",
-  "#0a7156",
-  "#075841",
-  "#053f2e",
+  "#A64A30",
+  "#8B3D26",
+  "#70301D",
+  "#552414",
+  "#3A180D",
 ];
 
-// Amber shades for Claude models
+// Apricot shades for Claude models
 const CLAUDE_COLORS = [
-  "#d97706",
-  "#b45309",
-  "#92400e",
-  "#78350f",
-  "#5a2709",
+  "#F6D1A3",
+  "#E8BB80",
+  "#DAA55D",
+  "#CC8F3A",
+  "#BE7917",
 ];
 
 function getModelColor(platform: string, index: number): string {
@@ -70,13 +70,13 @@ function CustomTooltip({
 
   return (
     <div
-      className="rounded-lg border border-[#2a2a3a] p-3 text-xs shadow-xl"
-      style={{ backgroundColor: "#1a1a26" }}
+      className="rounded-lg p-3 text-xs shadow-xl"
+      style={{ backgroundColor: "#111111", border: "1px solid #A64A3044" }}
     >
-      <p className="font-semibold text-[#f1f5f9] mb-1">
+      <p className="font-semibold text-white mb-1">
         {formatModelName(item.model)}
       </p>
-      <p className="text-[#94a3b8]">
+      <p style={{ color: "#6a6a6a" }}>
         {item.percentage.toFixed(1)}% &middot; {formatTokens(item.tokens)} tokens
       </p>
     </div>
@@ -85,12 +85,12 @@ function CustomTooltip({
 
 export function ModelDistribution({ data, loading = false }: ModelDistributionProps) {
   if (loading) {
-    return <Skeleton className="w-full h-[300px] bg-[#1a1a26]" />;
+    return <Skeleton className="w-full h-[300px] bg-[#1a1a1a]" />;
   }
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[300px] text-[#94a3b8] text-sm">
+      <div className="flex items-center justify-center h-[300px] text-sm" style={{ color: "#6a6a6a" }}>
         No model data available
       </div>
     );
@@ -117,7 +117,7 @@ export function ModelDistribution({ data, loading = false }: ModelDistributionPr
             innerRadius={60}
             outerRadius={100}
             strokeWidth={2}
-            stroke="#0a0a0f"
+            stroke="#080808"
           >
             {coloredData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
@@ -138,13 +138,13 @@ export function ModelDistribution({ data, loading = false }: ModelDistributionPr
               className="inline-block w-2.5 h-2.5 rounded-sm flex-shrink-0"
               style={{ backgroundColor: item.color }}
             />
-            <span className="text-[#f1f5f9] truncate flex-1">
+            <span className="text-white truncate flex-1">
               {formatModelName(item.model)}
             </span>
-            <span className="text-[#94a3b8] flex-shrink-0">
+            <span className="flex-shrink-0" style={{ color: "#6a6a6a" }}>
               {item.percentage.toFixed(1)}%
             </span>
-            <span className="text-[#94a3b8] flex-shrink-0 hidden sm:block">
+            <span className="flex-shrink-0 hidden sm:block" style={{ color: "#6a6a6a" }}>
               {formatTokens(item.tokens)}
             </span>
           </li>

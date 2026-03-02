@@ -18,6 +18,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// ── Brand tokens ──────────────────────────────────────────────────────────────
+const TERRACOTTA = "#A64A30";
+
 interface NavItem {
   label: string;
   href: string;
@@ -28,31 +31,24 @@ interface NavSectionProps {
   title: string;
   icon: React.ReactNode;
   items: NavItem[];
-  accentColor: string;
   defaultOpen?: boolean;
 }
 
-function NavSection({
-  title,
-  icon,
-  items,
-  accentColor,
-  defaultOpen = true,
-}: NavSectionProps) {
+function NavSection({ title, icon, items, defaultOpen = true }: NavSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   const pathname = usePathname();
 
   return (
-    <div className="mb-2">
+    <div className="mb-1">
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-[#1a1a26]"
-        style={{ color: "#94a3b8" }}
+        className="flex w-full items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-widest transition-colors hover:bg-[#111111]"
+        style={{ color: "#3a3a3a" }}
       >
-        <span style={{ color: accentColor }}>{icon}</span>
+        <span style={{ color: "#3a3a3a" }}>{icon}</span>
         <span className="flex-1 text-left">{title}</span>
         <ChevronDown
-          size={14}
+          size={12}
           className="transition-transform duration-200"
           style={{ transform: open ? "rotate(0deg)" : "rotate(-90deg)" }}
         />
@@ -73,18 +69,18 @@ function NavSection({
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors relative",
                     isActive
-                      ? "text-[#f1f5f9] bg-[#1a1a26]"
-                      : "text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#1a1a26]/50"
+                      ? "text-white bg-[#161616]"
+                      : "text-[#5a5a5a] hover:text-white hover:bg-[#111111]"
                   )}
                 >
                   {isActive && (
                     <span
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r"
-                      style={{ backgroundColor: accentColor }}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 rounded-r"
+                      style={{ backgroundColor: TERRACOTTA }}
                     />
                   )}
                   <span
-                    style={{ color: isActive ? accentColor : undefined }}
+                    style={{ color: isActive ? TERRACOTTA : undefined }}
                     className="flex-shrink-0"
                   >
                     {item.icon}
@@ -101,94 +97,69 @@ function NavSection({
 }
 
 const aiNavItems: NavItem[] = [
-  {
-    label: "Overview",
-    href: "/",
-    icon: <BarChart3 size={16} />,
-  },
-  {
-    label: "Users",
-    href: "/users",
-    icon: <Users size={16} />,
-  },
-  {
-    label: "Productivity",
-    href: "/productivity",
-    icon: <TrendingUp size={16} />,
-  },
+  { label: "Overview",    href: "/",            icon: <BarChart3 size={16} /> },
+  { label: "Users",       href: "/users",        icon: <Users size={16} /> },
+  { label: "Productivity",href: "/productivity", icon: <TrendingUp size={16} /> },
 ];
 
 const crmNavItems: NavItem[] = [
-  {
-    label: "Pipeline",
-    href: "/pipeline",
-    icon: <GitBranch size={16} />,
-  },
-  {
-    label: "Relationships",
-    href: "/relationships",
-    icon: <Network size={16} />,
-  },
-  {
-    label: "CRM Health",
-    href: "/crm-health",
-    icon: <Activity size={16} />,
-  },
-  {
-    label: "CRM Activity",
-    href: "/crm-activity",
-    icon: <Calendar size={16} />,
-  },
+  { label: "Pipeline",    href: "/pipeline",     icon: <GitBranch size={16} /> },
+  { label: "Relationships",href:"/relationships",icon: <Network size={16} /> },
+  { label: "CRM Health",  href: "/crm-health",   icon: <Activity size={16} /> },
+  { label: "CRM Activity",href: "/crm-activity", icon: <Calendar size={16} /> },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const isSettings =
-    pathname === "/settings" || pathname.startsWith("/settings/");
+  const isSettings = pathname === "/settings" || pathname.startsWith("/settings/");
 
   return (
     <aside
-      className="w-60 flex-shrink-0 flex flex-col h-screen border-r border-[#2a2a3a] bg-[#0a0a0f]"
-      style={{ minWidth: "15rem" }}
+      className="w-60 flex-shrink-0 flex flex-col h-screen"
+      style={{
+        minWidth: "15rem",
+        backgroundColor: "#000000",
+        borderRight: "1px solid #1e1e1e",
+      }}
     >
       {/* Logo */}
-      <div className="px-4 py-5 border-b border-[#2a2a3a]">
-        <p className="text-base font-bold text-[#f1f5f9] leading-tight">
+      <div className="px-4 py-5" style={{ borderBottom: "1px solid #1e1e1e" }}>
+        <p className="text-sm font-bold tracking-widest uppercase text-white">
           Consello
         </p>
-        <p className="text-xs text-[#94a3b8] mt-0.5">Executive Intelligence</p>
+        <p className="text-xs mt-0.5 font-medium" style={{ color: TERRACOTTA }}>
+          Executive Intelligence
+        </p>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
         <NavSection
           title="AI Intelligence"
-          icon={<Brain size={14} />}
+          icon={<Brain size={13} />}
           items={aiNavItems}
-          accentColor="#3b82f6"
           defaultOpen={true}
         />
         <NavSection
           title="CRM Intelligence"
-          icon={<Building2 size={14} />}
+          icon={<Building2 size={13} />}
           items={crmNavItems}
-          accentColor="#ff7a59"
           defaultOpen={true}
         />
       </nav>
 
       {/* Settings */}
-      <div className="px-3 pb-4 border-t border-[#2a2a3a] pt-3">
+      <div className="px-3 pb-4 pt-3" style={{ borderTop: "1px solid #1e1e1e" }}>
         <Link
           href="/settings"
           className={cn(
             "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
             isSettings
-              ? "text-[#f1f5f9] bg-[#1a1a26]"
-              : "text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#1a1a26]/50"
+              ? "text-white bg-[#161616]"
+              : "text-[#5a5a5a] hover:text-white hover:bg-[#111111]"
           )}
         >
-          <Settings size={16} />
+          <Settings size={16} style={{ color: isSettings ? TERRACOTTA : undefined }} />
           Settings
         </Link>
       </div>

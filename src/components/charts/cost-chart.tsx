@@ -13,6 +13,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, parseISO } from "date-fns";
 
+const TERRACOTTA = "#A64A30";
+const APRICOT    = "#F6D1A3";
+
 interface CostChartProps {
   data: Array<{ date: string; chatgpt: number; claude: number; total: number }>;
   loading?: boolean;
@@ -54,25 +57,25 @@ function CustomTooltip({
 
   return (
     <div
-      className="rounded-lg border border-[#2a2a3a] p-3 text-xs shadow-xl"
-      style={{ backgroundColor: "#1a1a26" }}
+      className="rounded-lg p-3 text-xs shadow-xl"
+      style={{ backgroundColor: "#111111", border: `1px solid ${TERRACOTTA}44` }}
     >
-      <p className="font-semibold text-[#f1f5f9] mb-2">{formattedLabel}</p>
+      <p className="font-semibold text-white mb-2">{formattedLabel}</p>
       {payload.map((entry) => (
         <div key={entry.name} className="flex items-center gap-2 mb-1">
           <span
             className="inline-block w-2 h-2 rounded-sm"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-[#94a3b8] capitalize">{entry.name}:</span>
-          <span className="text-[#f1f5f9] font-medium">
+          <span className="capitalize" style={{ color: "#6a6a6a" }}>{entry.name}:</span>
+          <span className="text-white font-medium">
             {formatCostFull(entry.value)}
           </span>
         </div>
       ))}
-      <div className="border-t border-[#2a2a3a] mt-2 pt-2 flex items-center gap-2">
-        <span className="text-[#94a3b8]">Total:</span>
-        <span className="text-[#f1f5f9] font-semibold">{formatCostFull(total)}</span>
+      <div className="mt-2 pt-2 flex items-center gap-2" style={{ borderTop: "1px solid #1e1e1e" }}>
+        <span style={{ color: "#6a6a6a" }}>Total:</span>
+        <span className="text-white font-semibold">{formatCostFull(total)}</span>
       </div>
     </div>
   );
@@ -80,7 +83,7 @@ function CustomTooltip({
 
 export function CostChart({ data, loading = false }: CostChartProps) {
   if (loading) {
-    return <Skeleton className="w-full h-[300px] bg-[#1a1a26]" />;
+    return <Skeleton className="w-full h-[300px] bg-[#1a1a1a]" />;
   }
 
   const tickFormatter = (value: string) => {
@@ -100,27 +103,27 @@ export function CostChart({ data, loading = false }: CostChartProps) {
       >
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="#2a2a3a"
+          stroke="#1e1e1e"
           vertical={false}
         />
         <XAxis
           dataKey="date"
           tickFormatter={tickFormatter}
-          tick={{ fill: "#94a3b8", fontSize: 11 }}
-          axisLine={{ stroke: "#2a2a3a" }}
+          tick={{ fill: "#4a4a4a", fontSize: 11 }}
+          axisLine={{ stroke: "#1e1e1e" }}
           tickLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
           tickFormatter={formatCostAxis}
-          tick={{ fill: "#94a3b8", fontSize: 11 }}
+          tick={{ fill: "#4a4a4a", fontSize: 11 }}
           axisLine={false}
           tickLine={false}
           width={52}
         />
-        <Tooltip content={<CustomTooltip />} cursor={{ fill: "#1a1a26" }} />
+        <Tooltip content={<CustomTooltip />} cursor={{ fill: "#1a1a1a" }} />
         <Legend
-          wrapperStyle={{ paddingTop: "12px", fontSize: "12px", color: "#94a3b8" }}
+          wrapperStyle={{ paddingTop: "12px", fontSize: "12px", color: "#6a6a6a" }}
           formatter={(value: string) =>
             value === "chatgpt" ? "ChatGPT" : "Claude"
           }
@@ -129,14 +132,14 @@ export function CostChart({ data, loading = false }: CostChartProps) {
           dataKey="chatgpt"
           name="chatgpt"
           stackId="cost"
-          fill="#10a37f"
+          fill={TERRACOTTA}
           radius={[0, 0, 0, 0]}
         />
         <Bar
           dataKey="claude"
           name="claude"
           stackId="cost"
-          fill="#d97706"
+          fill={APRICOT}
           radius={[3, 3, 0, 0]}
         />
       </BarChart>

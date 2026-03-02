@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+const TERRACOTTA = "#A64A30";
+
 interface SyncButtonProps {
   platform: string;
   label: string;
@@ -17,7 +19,7 @@ export function SyncButton({
   label,
   action,
   disabled = false,
-  accentColor = "#6366f1",
+  accentColor = TERRACOTTA,
 }: SyncButtonProps) {
   const [state, setState] = useState<SyncState>("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -38,51 +40,34 @@ export function SyncButton({
       setState("error");
       setMessage(err instanceof Error ? err.message : "Network error");
     }
-    setTimeout(() => {
-      setState("idle");
-      setMessage(null);
-    }, 4000);
+    setTimeout(() => { setState("idle"); setMessage(null); }, 4000);
   }
 
   const isLoading = state === "loading";
 
-  const buttonBg =
-    state === "success"
-      ? "#052e16"
-      : state === "error"
-      ? "#450a0a"
-      : "#1a1a26";
-
-  const buttonColor =
-    state === "success"
-      ? "#10a37f"
-      : state === "error"
-      ? "#ef4444"
-      : disabled
-      ? "#94a3b8"
-      : accentColor;
-
-  const buttonBorder =
-    state === "success"
-      ? "#10a37f"
-      : state === "error"
-      ? "#ef4444"
-      : disabled
-      ? "#2a2a3a"
-      : accentColor;
+  const bg    = state === "success" ? "#0d1a0d" : state === "error" ? "#1a0d0d" : "transparent";
+  const color = state === "success" ? "#6fcf97"
+              : state === "error"   ? "#ef4444"
+              : disabled            ? "#3a3a3a"
+              : accentColor;
+  const border= state === "success" ? "#6fcf9733"
+              : state === "error"   ? "#ef444433"
+              : disabled            ? "#242424"
+              : `${accentColor}66`;
 
   return (
     <div className="space-y-2">
       <button
         onClick={handleSync}
         disabled={disabled || isLoading}
-        className="w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-all flex items-center justify-center gap-2"
+        className="w-full px-4 py-2.5 text-sm font-medium transition-all flex items-center justify-center gap-2"
         style={{
-          backgroundColor: buttonBg,
-          color: buttonColor,
-          border: `1px solid ${buttonBorder}`,
+          backgroundColor: bg,
+          color,
+          border: `1px solid ${border}`,
+          borderRadius: "9999px",
           cursor: disabled ? "not-allowed" : isLoading ? "wait" : "pointer",
-          opacity: disabled ? 0.5 : 1,
+          opacity: disabled ? 0.4 : 1,
         }}
       >
         {isLoading && (
@@ -101,16 +86,13 @@ export function SyncButton({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         )}
-        {isLoading
-          ? `Syncing ${label}...`
-          : state === "success"
-          ? "Sync complete"
-          : state === "error"
-          ? "Sync failed"
+        {isLoading ? `Syncing ${label}...`
+          : state === "success" ? "Sync complete"
+          : state === "error"   ? "Sync failed"
           : `Sync ${label}`}
       </button>
       {message && (
-        <p className="text-xs text-center" style={{ color: state === "error" ? "#ef4444" : "#10a37f" }}>
+        <p className="text-xs text-center" style={{ color: state === "error" ? "#ef4444" : "#6a6a6a" }}>
           {message}
         </p>
       )}

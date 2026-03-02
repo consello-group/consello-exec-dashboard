@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -7,7 +9,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -50,86 +52,99 @@
 :root {
   --radius: 0.625rem;
 
-  /* Consello dark-first design tokens */
-  --background: #0a0a0f;
-  --foreground: #f1f5f9;
-  --surface: #12121a;
-  --overlay: #1a1a26;
-  --border: #2a2a3a;
-  --muted: #94a3b8;
-  --chatgpt: #10a37f;
-  --claude: #d97706;
-  --hubspot: #ff7a59;
+  /* ── Consello Brand Palette ───────────────────────────────────── */
+  --background:     #080808;
+  --foreground:     #ffffff;
+  --surface:        #111111;
+  --overlay:        #1a1a1a;
+  --border:         #242424;
+  --muted:          #6a6a6a;
+
+  /* Brand accents */
+  --terracotta:     #A64A30;
+  --terracotta-dim: #6B2E1C;
+  --apricot:        #F6D1A3;
+
+  /* Platform references → brand-unified */
+  --chatgpt:        #A64A30;   /* terracotta */
+  --claude:         #F6D1A3;   /* apricot    */
+  --hubspot:        #ffffff;   /* white      */
 
   /* shadcn token overrides */
-  --card: #12121a;
-  --card-foreground: #f1f5f9;
-  --popover: #1a1a26;
-  --popover-foreground: #f1f5f9;
-  --primary: #f1f5f9;
-  --primary-foreground: #0a0a0f;
-  --secondary: #1a1a26;
-  --secondary-foreground: #f1f5f9;
-  --muted-foreground: #94a3b8;
-  --accent: #1a1a26;
-  --accent-foreground: #f1f5f9;
-  --destructive: oklch(0.704 0.191 22.216);
-  --input: #2a2a3a;
-  --ring: #3a3a4a;
-  --chart-1: #10a37f;
-  --chart-2: #d97706;
-  --chart-3: #ff7a59;
-  --chart-4: #3b82f6;
-  --chart-5: #8b5cf6;
-  --sidebar: #0a0a0f;
-  --sidebar-foreground: #f1f5f9;
-  --sidebar-primary: #f1f5f9;
-  --sidebar-primary-foreground: #0a0a0f;
-  --sidebar-accent: #1a1a26;
-  --sidebar-accent-foreground: #f1f5f9;
-  --sidebar-border: #2a2a3a;
-  --sidebar-ring: #3a3a4a;
+  --card:                    #111111;
+  --card-foreground:         #ffffff;
+  --popover:                 #1a1a1a;
+  --popover-foreground:      #ffffff;
+  --primary:                 #ffffff;
+  --primary-foreground:      #080808;
+  --secondary:               #1a1a1a;
+  --secondary-foreground:    #ffffff;
+  --muted-foreground:        #6a6a6a;
+  --accent:                  #1a1a1a;
+  --accent-foreground:       #ffffff;
+  --destructive:             #c0392b;
+  --input:                   #242424;
+  --ring:                    #A64A30;
+
+  /* Chart colors → brand palette */
+  --chart-1: #A64A30;   /* terracotta      */
+  --chart-2: #F6D1A3;   /* apricot         */
+  --chart-3: #ffffff;   /* white           */
+  --chart-4: #6B2E1C;   /* deep terracotta */
+  --chart-5: #6a6a6a;   /* muted gray      */
+
+  /* Sidebar */
+  --sidebar:                    #000000;
+  --sidebar-foreground:         #ffffff;
+  --sidebar-primary:            #ffffff;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent:             #1a1a1a;
+  --sidebar-accent-foreground:  #ffffff;
+  --sidebar-border:             #1e1e1e;
+  --sidebar-ring:               #A64A30;
 }
 
-/* Dark class mirrors :root since we are dark-first */
+/* Dark mirrors :root — stays dark-first */
 .dark {
-  --background: #0a0a0f;
-  --foreground: #f1f5f9;
-  --surface: #12121a;
-  --overlay: #1a1a26;
-  --border: #2a2a3a;
-  --muted: #94a3b8;
-  --chatgpt: #10a37f;
-  --claude: #d97706;
-  --hubspot: #ff7a59;
-
-  --card: #12121a;
-  --card-foreground: #f1f5f9;
-  --popover: #1a1a26;
-  --popover-foreground: #f1f5f9;
-  --primary: #f1f5f9;
-  --primary-foreground: #0a0a0f;
-  --secondary: #1a1a26;
-  --secondary-foreground: #f1f5f9;
-  --muted-foreground: #94a3b8;
-  --accent: #1a1a26;
-  --accent-foreground: #f1f5f9;
-  --destructive: oklch(0.704 0.191 22.216);
-  --input: #2a2a3a;
-  --ring: #3a3a4a;
-  --chart-1: #10a37f;
-  --chart-2: #d97706;
-  --chart-3: #ff7a59;
-  --chart-4: #3b82f6;
-  --chart-5: #8b5cf6;
-  --sidebar: #0a0a0f;
-  --sidebar-foreground: #f1f5f9;
-  --sidebar-primary: #f1f5f9;
-  --sidebar-primary-foreground: #0a0a0f;
-  --sidebar-accent: #1a1a26;
-  --sidebar-accent-foreground: #f1f5f9;
-  --sidebar-border: #2a2a3a;
-  --sidebar-ring: #3a3a4a;
+  --background:     #080808;
+  --foreground:     #ffffff;
+  --surface:        #111111;
+  --overlay:        #1a1a1a;
+  --border:         #242424;
+  --muted:          #6a6a6a;
+  --terracotta:     #A64A30;
+  --terracotta-dim: #6B2E1C;
+  --apricot:        #F6D1A3;
+  --chatgpt:        #A64A30;
+  --claude:         #F6D1A3;
+  --hubspot:        #ffffff;
+  --card:                    #111111;
+  --card-foreground:         #ffffff;
+  --popover:                 #1a1a1a;
+  --popover-foreground:      #ffffff;
+  --primary:                 #ffffff;
+  --primary-foreground:      #080808;
+  --secondary:               #1a1a1a;
+  --secondary-foreground:    #ffffff;
+  --muted-foreground:        #6a6a6a;
+  --accent:                  #1a1a1a;
+  --accent-foreground:       #ffffff;
+  --destructive:             #c0392b;
+  --input:                   #242424;
+  --ring:                    #A64A30;
+  --chart-1: #A64A30;
+  --chart-2: #F6D1A3;
+  --chart-3: #ffffff;
+  --chart-4: #6B2E1C;
+  --chart-5: #6a6a6a;
+  --sidebar:                    #000000;
+  --sidebar-foreground:         #ffffff;
+  --sidebar-primary:            #ffffff;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent:             #1a1a1a;
+  --sidebar-accent-foreground:  #ffffff;
+  --sidebar-border:             #1e1e1e;
+  --sidebar-ring:               #A64A30;
 }
 
 @layer base {
@@ -138,22 +153,12 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-family: 'DM Sans', Arial, sans-serif;
   }
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--surface);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #3a3a4a;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }

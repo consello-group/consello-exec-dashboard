@@ -6,6 +6,9 @@ import { UsageChart } from "@/components/charts/usage-chart";
 import { CostChart } from "@/components/charts/cost-chart";
 import { ModelDistribution } from "@/components/charts/model-distribution";
 
+const TERRACOTTA = "#A64A30";
+const APRICOT    = "#F6D1A3";
+
 // ─── Formatting helpers ───────────────────────────────────────────────────────
 
 function formatTokens(n: bigint | number): string {
@@ -47,23 +50,24 @@ function KpiCard({
 }) {
   return (
     <div
-      className="rounded-xl border p-5 flex flex-col gap-2"
-      style={{ backgroundColor: "#12121a", borderColor: "#2a2a3a" }}
+      className="rounded-xl p-5 flex flex-col gap-2 relative overflow-hidden"
+      style={{ backgroundColor: "#111111", border: "1px solid #1e1e1e" }}
     >
-      <div className="flex items-center gap-2">
-        <span
-          className="inline-block w-2.5 h-2.5 rounded-full"
-          style={{ backgroundColor: accentColor }}
-        />
-        <span className="text-sm font-medium" style={{ color: "#94a3b8" }}>
-          {label}
-        </span>
-      </div>
-      <p className="text-3xl font-bold tracking-tight" style={{ color: "#f1f5f9" }}>
+      <span
+        className="absolute left-0 top-0 bottom-0 w-[2px]"
+        style={{ backgroundColor: accentColor }}
+      />
+      <span
+        className="text-xs font-medium uppercase tracking-wider"
+        style={{ color: "#5a5a5a" }}
+      >
+        {label}
+      </span>
+      <p className="text-2xl font-bold text-white leading-none tracking-tight">
         {value}
       </p>
       {sub && (
-        <p className="text-xs" style={{ color: "#94a3b8" }}>
+        <p className="text-xs" style={{ color: "#5a5a5a" }}>
           {sub}
         </p>
       )}
@@ -148,7 +152,6 @@ export default async function AIOverviewPage() {
   const lastSync = lastSyncs[0]?.syncedAt ?? null;
 
   // ── Daily usage transform ─────────────────────────────────────────────────
-  // Build a map: date → { chatgpt, claude }
   const usageMap = new Map<string, { chatgpt: number; claude: number }>();
   for (const row of dailyUsageRaw) {
     const key = (row.date as Date).toISOString().slice(0, 10);
@@ -192,13 +195,11 @@ export default async function AIOverviewPage() {
   });
 
   return (
-    <div className="p-6 space-y-6" style={{ backgroundColor: "#0a0a0f", minHeight: "100vh" }}>
+    <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: "#f1f5f9" }}>
-          AI Usage Overview
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
+        <h1 className="text-2xl font-bold text-white">AI Usage Overview</h1>
+        <p className="text-sm mt-1" style={{ color: "#5a5a5a" }}>
           Last 30 days &middot; Updated {formatDate(lastSync)}
         </p>
       </div>
@@ -208,58 +209,58 @@ export default async function AIOverviewPage() {
         <KpiCard
           label="Total Tokens"
           value={formatTokens(totalTokens)}
-          accentColor="#6366f1"
+          accentColor={TERRACOTTA}
         />
         <KpiCard
           label="Total Cost"
           value={formatCost(totalCost)}
-          accentColor="#10a37f"
+          accentColor={TERRACOTTA}
         />
         <KpiCard
           label="Active Users"
           value={String(activeUsers)}
-          accentColor="#3b82f6"
+          accentColor={TERRACOTTA}
         />
         <KpiCard
           label="ChatGPT Tokens"
           value={formatTokens(chatgptTokens)}
           sub={formatCost(chatgptCost)}
-          accentColor="#10a37f"
+          accentColor={TERRACOTTA}
         />
         <KpiCard
           label="Claude Tokens"
           value={formatTokens(claudeTokens)}
           sub={formatCost(claudeCost)}
-          accentColor="#d97706"
+          accentColor={APRICOT}
         />
       </div>
 
       {/* Tabs */}
       <div
         className="rounded-xl border p-1"
-        style={{ backgroundColor: "#12121a", borderColor: "#2a2a3a" }}
+        style={{ backgroundColor: "#111111", borderColor: "#1e1e1e" }}
       >
         <Tabs defaultValue="usage">
           <div className="px-4 pt-3 pb-1">
             <TabsList
               className="inline-flex gap-1 rounded-lg p-1"
-              style={{ backgroundColor: "#0a0a0f" }}
+              style={{ backgroundColor: "#080808" }}
             >
               <TabsTrigger
                 value="usage"
-                className="rounded-md px-4 py-1.5 text-sm font-medium transition-colors data-[state=active]:bg-[#1a1a26] data-[state=active]:text-[#f1f5f9] text-[#94a3b8]"
+                className="rounded-md px-4 py-1.5 text-sm font-medium transition-colors data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white text-[#5a5a5a]"
               >
                 Usage
               </TabsTrigger>
               <TabsTrigger
                 value="costs"
-                className="rounded-md px-4 py-1.5 text-sm font-medium transition-colors data-[state=active]:bg-[#1a1a26] data-[state=active]:text-[#f1f5f9] text-[#94a3b8]"
+                className="rounded-md px-4 py-1.5 text-sm font-medium transition-colors data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white text-[#5a5a5a]"
               >
                 Costs
               </TabsTrigger>
               <TabsTrigger
                 value="models"
-                className="rounded-md px-4 py-1.5 text-sm font-medium transition-colors data-[state=active]:bg-[#1a1a26] data-[state=active]:text-[#f1f5f9] text-[#94a3b8]"
+                className="rounded-md px-4 py-1.5 text-sm font-medium transition-colors data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white text-[#5a5a5a]"
               >
                 Models
               </TabsTrigger>
@@ -268,7 +269,7 @@ export default async function AIOverviewPage() {
 
           <TabsContent value="usage" className="p-4 pt-2">
             {usageData.length === 0 ? (
-              <div className="h-64 flex items-center justify-center" style={{ color: "#94a3b8" }}>
+              <div className="h-64 flex items-center justify-center text-sm" style={{ color: "#5a5a5a" }}>
                 No usage data for the last 30 days.
               </div>
             ) : (
@@ -278,7 +279,7 @@ export default async function AIOverviewPage() {
 
           <TabsContent value="costs" className="p-4 pt-2">
             {costData.length === 0 ? (
-              <div className="h-64 flex items-center justify-center" style={{ color: "#94a3b8" }}>
+              <div className="h-64 flex items-center justify-center text-sm" style={{ color: "#5a5a5a" }}>
                 No cost data for the last 30 days.
               </div>
             ) : (
@@ -288,7 +289,7 @@ export default async function AIOverviewPage() {
 
           <TabsContent value="models" className="p-4 pt-2">
             {modelData.length === 0 ? (
-              <div className="h-64 flex items-center justify-center" style={{ color: "#94a3b8" }}>
+              <div className="h-64 flex items-center justify-center text-sm" style={{ color: "#5a5a5a" }}>
                 No model data for the last 30 days.
               </div>
             ) : (

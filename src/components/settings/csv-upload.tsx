@@ -5,6 +5,8 @@ import { importChatGPTCSV } from "@/app/(dashboard)/settings/actions";
 
 type UploadState = "idle" | "loading" | "success" | "error";
 
+const TERRACOTTA = "#A64A30";
+
 export function ChatGPTCsvUpload() {
   const [files, setFiles] = useState<File[]>([]);
   const [state, setState] = useState<UploadState>("idle");
@@ -76,15 +78,14 @@ export function ChatGPTCsvUpload() {
   }
 
   const isLoading = state === "loading";
-  const accent = "#10a37f";
 
   const zoneBorder = isDragging
-    ? accent
+    ? TERRACOTTA
     : state === "error"
     ? "#ef4444"
-    : "#2a2a3a";
+    : "#242424";
 
-  const zoneBg = isDragging ? "#0a1f18" : "#0a0a0f";
+  const zoneBg = isDragging ? "#1a0d09" : "#111111";
 
   return (
     <div className="space-y-3">
@@ -105,7 +106,7 @@ export function ChatGPTCsvUpload() {
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
-          style={{ color: isDragging ? accent : "#475569" }}
+          style={{ color: isDragging ? TERRACOTTA : "#5a5a5a" }}
         >
           <path
             strokeLinecap="round"
@@ -114,10 +115,10 @@ export function ChatGPTCsvUpload() {
             d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
           />
         </svg>
-        <p className="text-sm font-medium" style={{ color: isDragging ? accent : "#cbd5e1" }}>
+        <p className="text-sm font-medium" style={{ color: isDragging ? TERRACOTTA : "#e0e0e0" }}>
           {isDragging ? "Drop CSV files here" : "Drop CSV files here, or click to browse"}
         </p>
-        <p className="text-xs mt-1" style={{ color: "#475569" }}>
+        <p className="text-xs mt-1" style={{ color: "#5a5a5a" }}>
           OpenAI monthly user report exports · Multiple files supported
         </p>
         <input
@@ -137,13 +138,13 @@ export function ChatGPTCsvUpload() {
             <span
               key={f.name}
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
-              style={{ backgroundColor: "#1a1a26", color: "#cbd5e1", border: "1px solid #2a2a3a" }}
+              style={{ backgroundColor: "#1a1a1a", color: "#e0e0e0", border: "1px solid #242424" }}
             >
               {f.name}
               <button
                 onClick={() => removeFile(f.name)}
                 className="rounded-full p-0.5 transition-colors hover:text-red-400"
-                style={{ color: "#475569" }}
+                style={{ color: "#5a5a5a" }}
                 aria-label={`Remove ${f.name}`}
               >
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -159,20 +160,21 @@ export function ChatGPTCsvUpload() {
       <button
         onClick={handleImport}
         disabled={!files.length || isLoading}
-        className="w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-all flex items-center justify-center gap-2"
+        className="w-full px-4 py-2.5 text-sm font-medium transition-all flex items-center justify-center gap-2"
         style={{
+          borderRadius: "9999px",
           backgroundColor:
-            state === "success" ? "#052e16" : state === "error" ? "#450a0a" : "#1a1a26",
+            state === "success" ? "#1a0d09" : state === "error" ? "#450a0a" : "transparent",
           color:
             state === "success"
-              ? accent
+              ? TERRACOTTA
               : state === "error"
               ? "#ef4444"
               : !files.length || isLoading
-              ? "#475569"
-              : accent,
+              ? "#5a5a5a"
+              : TERRACOTTA,
           border: `1px solid ${
-            state === "success" ? accent : state === "error" ? "#ef4444" : "#2a2a3a"
+            state === "success" ? TERRACOTTA : state === "error" ? "#ef4444" : "#242424"
           }`,
           cursor: !files.length || isLoading ? "not-allowed" : "pointer",
           opacity: !files.length ? 0.5 : 1,
@@ -207,7 +209,7 @@ export function ChatGPTCsvUpload() {
 
       {/* Result / error message */}
       {message && (
-        <p className="text-xs text-center" style={{ color: state === "error" ? "#ef4444" : accent }}>
+        <p className="text-xs text-center" style={{ color: state === "error" ? "#ef4444" : TERRACOTTA }}>
           {state === "success" ? `Imported: ${message}` : message}
         </p>
       )}
