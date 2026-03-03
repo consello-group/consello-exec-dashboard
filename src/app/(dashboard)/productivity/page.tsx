@@ -9,6 +9,10 @@ import {
 } from "@/lib/productivity";
 import type { UsageInput } from "@/lib/productivity";
 
+const TERRACOTTA  = "#A64A30";
+const APRICOT     = "#F6D1A3";
+const DARK_BORDER = "#2A2A2A";
+
 // ─── Formatting helpers ───────────────────────────────────────────────────────
 
 function formatCost(n: number): string {
@@ -35,23 +39,21 @@ function KpiCard({
 }) {
   return (
     <div
-      className="rounded-xl border p-5 flex flex-col gap-2"
-      style={{ backgroundColor: "#12121a", borderColor: "#2a2a3a" }}
+      className="rounded-xl p-5 flex flex-col gap-2 relative overflow-hidden"
+      style={{ backgroundColor: "#111111", border: `1px solid ${DARK_BORDER}` }}
     >
-      <div className="flex items-center gap-2">
-        <span
-          className="inline-block w-2.5 h-2.5 rounded-full"
-          style={{ backgroundColor: accentColor }}
-        />
-        <span className="text-sm font-medium" style={{ color: "#94a3b8" }}>
-          {label}
-        </span>
-      </div>
-      <p className="text-3xl font-bold tracking-tight" style={{ color: "#f1f5f9" }}>
+      <span
+        className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{ backgroundColor: accentColor, opacity: 0.7 }}
+      />
+      <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#999999" }}>
+        {label}
+      </span>
+      <p className="text-3xl font-bold text-white leading-none" style={{ letterSpacing: "-0.02em" }}>
         {value}
       </p>
       {sub && (
-        <p className="text-xs" style={{ color: "#94a3b8" }}>
+        <p className="text-xs" style={{ color: "#666666" }}>
           {sub}
         </p>
       )}
@@ -61,15 +63,15 @@ function KpiCard({
 
 // ─── Tier badge ───────────────────────────────────────────────────────────────
 
-const TIER_STYLES: Record<string, { bg: string; color: string }> = {
-  power: { bg: "#6366f1", color: "#f1f5f9" },
-  moderate: { bg: "#3b82f6", color: "#f1f5f9" },
-  light: { bg: "#10a37f", color: "#f1f5f9" },
-  "non-user": { bg: "#2a2a3a", color: "#94a3b8" },
+const TIER_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+  power:      { bg: "rgba(166,74,48,0.2)",   text: TERRACOTTA, border: "rgba(166,74,48,0.4)"   },
+  moderate:   { bg: "rgba(246,209,163,0.15)", text: APRICOT,    border: "rgba(246,209,163,0.3)" },
+  light:      { bg: "rgba(100,100,100,0.15)", text: "#AAAAAA",  border: "rgba(100,100,100,0.3)" },
+  "non-user": { bg: "rgba(40,40,40,0.2)",     text: "#555555",  border: "rgba(40,40,40,0.4)"    },
 };
 
 function TierBadge({ tier }: { tier: string }) {
-  const style = TIER_STYLES[tier] ?? { bg: "#2a2a3a", color: "#94a3b8" };
+  const style = TIER_STYLES[tier] ?? TIER_STYLES["non-user"];
   const labels: Record<string, string> = {
     power: "Power User",
     moderate: "Moderate",
@@ -78,15 +80,21 @@ function TierBadge({ tier }: { tier: string }) {
   };
   return (
     <span
-      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-      style={{ backgroundColor: style.bg, color: style.color }}
+      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+      style={{
+        backgroundColor: style.bg,
+        color: style.text,
+        border: `1px solid ${style.border}`,
+        letterSpacing: "0.03em",
+        textTransform: "uppercase",
+      }}
     >
       {labels[tier] ?? tier}
     </span>
   );
 }
 
-// ─── Adoption tier bar (server-rendered) ─────────────────────────────────────
+// ─── Adoption tier bar ────────────────────────────────────────────────────────
 
 function AdoptionBar({
   tiers,
@@ -96,10 +104,10 @@ function AdoptionBar({
   total: number;
 }) {
   const colors: Record<string, string> = {
-    power: "#6366f1",
-    moderate: "#3b82f6",
-    light: "#10a37f",
-    "non-user": "#2a2a3a",
+    power:      TERRACOTTA,
+    moderate:   "#D4856A",
+    light:      "#666666",
+    "non-user": "#333333",
   };
   const labels: Record<string, string> = {
     power: "Power",
@@ -109,30 +117,27 @@ function AdoptionBar({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {tiers.map((t) => (
         <div key={t.tier} className="flex items-center gap-3">
-          <div className="w-24 text-right text-sm" style={{ color: "#94a3b8" }}>
+          <span className="w-24 text-right text-xs" style={{ color: "#999999" }}>
             {labels[t.tier] ?? t.tier}
-          </div>
-          <div
-            className="flex-1 h-6 rounded-full overflow-hidden"
-            style={{ backgroundColor: "#0a0a0f" }}
-          >
+          </span>
+          <div className="flex-1 h-5 rounded-md overflow-hidden" style={{ backgroundColor: "#1A1A1A" }}>
             <div
-              className="h-full rounded-full transition-all"
+              className="h-full rounded-md"
               style={{
                 width: `${t.percentage}%`,
-                backgroundColor: colors[t.tier] ?? "#2a2a3a",
+                backgroundColor: colors[t.tier] ?? "#333333",
               }}
             />
           </div>
-          <div className="w-24 text-sm" style={{ color: "#94a3b8" }}>
+          <span className="w-28 text-xs" style={{ color: "#666666" }}>
             {t.count} users ({t.percentage}%)
-          </div>
+          </span>
         </div>
       ))}
-      <p className="text-xs pt-1" style={{ color: "#94a3b8" }}>
+      <p className="text-xs pt-1 pl-[108px]" style={{ color: "#555555" }}>
         Total: {total} users
       </p>
     </div>
@@ -145,7 +150,6 @@ export default async function ProductivityPage() {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  // Fetch raw data
   const [userUsageRaw, users, config, costByPlatform, configRecords] = await Promise.all([
     db.usageRecord.groupBy({
       by: ["userId", "platform"],
@@ -163,7 +167,6 @@ export default async function ProductivityPage() {
     db.productivityConfig.findMany(),
   ]);
 
-  // Aggregate tokens + requests per userId
   const perUser = new Map<string, { totalTokens: number; requests: number }>();
   for (const row of userUsageRaw) {
     if (!row.userId) continue;
@@ -173,7 +176,6 @@ export default async function ProductivityPage() {
     perUser.set(row.userId, existing);
   }
 
-  // Build UsageInput array (include all active users, even non-users)
   const usageInputs: UsageInput[] = users.map((u) => {
     const usage = perUser.get(u.id) ?? { totalTokens: 0, requests: 0 };
     return {
@@ -185,7 +187,6 @@ export default async function ProductivityPage() {
     };
   });
 
-  // Calculate metrics
   const totalAICost = costByPlatform.reduce(
     (sum, r) => sum + Number(r._sum.amount ?? 0),
     0
@@ -200,148 +201,123 @@ export default async function ProductivityPage() {
   const costPerProductiveHour = totalHoursSaved > 0 ? totalAICost / totalHoursSaved : 0;
 
   const adoptionTiers = buildAdoptionTiers(userResults);
-
-  // Sort user results by dollar value desc
   const sortedUsers = [...userResults].sort((a, b) => b.dollarValue - a.dollarValue);
 
   return (
-    <div className="p-6 space-y-6" style={{ backgroundColor: "#0a0a0f", minHeight: "100vh" }}>
+    <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: "#f1f5f9" }}>
-          AI Productivity Estimation
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
+        <h1 className="text-2xl font-bold text-white">AI Productivity Estimation</h1>
+        <p className="text-sm mt-1" style={{ color: "#666666" }}>
           Estimated business value from AI tool usage &middot; Last 30 days
         </p>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard
           label="Hours Saved"
           value={`${Math.round(totalHoursSaved).toLocaleString()} hrs`}
           sub={`${totalConversations.toLocaleString()} conversations`}
-          accentColor="#6366f1"
+          accentColor="#4ADE80"
         />
         <KpiCard
           label="Dollar Value"
           value={formatCost(totalDollarValue)}
           sub={`${activeUsers} active AI users`}
-          accentColor="#10a37f"
+          accentColor={APRICOT}
         />
         <KpiCard
           label="ROI Ratio"
-          value={
-            totalAICost > 0
-              ? `${roiRatio.toFixed(1)}x`
-              : "N/A"
-          }
+          value={totalAICost > 0 ? `${roiRatio.toFixed(1)}x` : "N/A"}
           sub={`AI cost: ${formatCost(totalAICost)}`}
-          accentColor="#3b82f6"
+          accentColor={TERRACOTTA}
         />
         <KpiCard
           label="Cost / Productive Hour"
-          value={
-            totalHoursSaved > 0
-              ? formatCost(costPerProductiveHour)
-              : "N/A"
-          }
+          value={totalHoursSaved > 0 ? formatCost(costPerProductiveHour) : "N/A"}
           sub="AI spend per hour saved"
-          accentColor="#d97706"
+          accentColor={TERRACOTTA}
         />
       </div>
 
       {/* Tabs */}
       <div
-        className="rounded-xl border p-1"
-        style={{ backgroundColor: "#12121a", borderColor: "#2a2a3a" }}
+        className="rounded-xl overflow-hidden"
+        style={{ backgroundColor: "#111111", border: `1px solid ${DARK_BORDER}` }}
       >
         <Tabs defaultValue="overview">
-          <div className="px-4 pt-3 pb-1">
+          <div className="px-5 pt-4 pb-0" style={{ borderBottom: `1px solid ${DARK_BORDER}` }}>
             <TabsList
-              className="inline-flex gap-1 rounded-lg p-1"
-              style={{ backgroundColor: "#0a0a0f" }}
+              className="inline-flex gap-0.5 rounded-lg p-0.5 mb-4"
+              style={{ backgroundColor: "#1A1A1A" }}
             >
-              <TabsTrigger
-                value="overview"
-                className="rounded-md px-4 py-1.5 text-sm font-medium transition-colors data-[state=active]:bg-[#1a1a26] data-[state=active]:text-[#f1f5f9] text-[#94a3b8]"
-              >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                value="byuser"
-                className="rounded-md px-4 py-1.5 text-sm font-medium transition-colors data-[state=active]:bg-[#1a1a26] data-[state=active]:text-[#f1f5f9] text-[#94a3b8]"
-              >
-                By User
-              </TabsTrigger>
-              <TabsTrigger
-                value="methodology"
-                className="rounded-md px-4 py-1.5 text-sm font-medium transition-colors data-[state=active]:bg-[#1a1a26] data-[state=active]:text-[#f1f5f9] text-[#94a3b8]"
-              >
-                Methodology
-              </TabsTrigger>
+              {["overview", "byuser", "methodology"].map((v) => (
+                <TabsTrigger
+                  key={v}
+                  value={v}
+                  className="rounded-md px-4 py-1.5 text-xs font-medium transition-all data-[state=active]:bg-[#0A0A0A] data-[state=active]:text-white text-[#666666]"
+                >
+                  {v === "overview" ? "Overview" : v === "byuser" ? "By User" : "Methodology"}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </div>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="p-4 pt-2 space-y-6">
+          <TabsContent value="overview" className="p-6 space-y-6">
             <div>
-              <h3 className="text-sm font-semibold mb-4" style={{ color: "#94a3b8" }}>
-                ADOPTION MATURITY
-              </h3>
-              <AdoptionBar
-                tiers={adoptionTiers}
-                total={usageInputs.length}
-              />
-            </div>
-            <div
-              className="rounded-lg p-4 space-y-2"
-              style={{ backgroundColor: "#0a0a0f", border: "1px solid #2a2a3a" }}
-            >
-              <p className="text-sm font-medium" style={{ color: "#f1f5f9" }}>
-                Adoption Summary
+              <p className="text-sm font-semibold text-white mb-1">Adoption Maturity</p>
+              <p className="text-xs mb-5" style={{ color: "#666666" }}>
+                User tiers based on conversation volume &middot; last 30 days
               </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                {adoptionTiers.map((t) => (
-                  <div key={t.tier} className="text-center">
-                    <p className="text-2xl font-bold" style={{ color: "#f1f5f9" }}>
-                      {t.count}
-                    </p>
-                    <p className="text-xs capitalize mt-1" style={{ color: "#94a3b8" }}>
-                      {t.tier === "non-user" ? "Non-Users" : `${t.tier.charAt(0).toUpperCase() + t.tier.slice(1)} Users`}
-                    </p>
-                    <p className="text-xs" style={{ color: "#94a3b8" }}>
-                      {t.percentage}%
-                    </p>
-                  </div>
-                ))}
+              <AdoptionBar tiers={adoptionTiers} total={usageInputs.length} />
+            </div>
+
+            <div
+              className="rounded-lg p-5"
+              style={{ backgroundColor: "#0A0A0A", border: `1px solid ${DARK_BORDER}` }}
+            >
+              <p className="text-sm font-semibold text-white mb-4">Adoption Summary</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {adoptionTiers.map((t) => {
+                  const style = TIER_STYLES[t.tier] ?? TIER_STYLES["non-user"];
+                  return (
+                    <div key={t.tier} className="text-center">
+                      <p className="text-2xl font-bold text-white">{t.count}</p>
+                      <p className="text-xs mt-1" style={{ color: style.text }}>
+                        {t.tier === "non-user"
+                          ? "Non-Users"
+                          : `${t.tier.charAt(0).toUpperCase() + t.tier.slice(1)} Users`}
+                      </p>
+                      <p className="text-xs" style={{ color: "#555555" }}>{t.percentage}%</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </TabsContent>
 
           {/* By User Tab */}
-          <TabsContent value="byuser" className="p-4 pt-2">
+          <TabsContent value="byuser" className="p-0">
             {sortedUsers.length === 0 ? (
-              <div className="py-8 text-center" style={{ color: "#94a3b8" }}>
+              <div className="py-8 text-center" style={{ color: "#666666" }}>
                 No user data available.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr style={{ borderBottom: "1px solid #2a2a3a" }}>
-                      {["User", "Conversations", "Hours Saved", "Dollar Value", "Tier"].map(
-                        (col) => (
-                          <th
-                            key={col}
-                            className="px-4 py-3 text-left font-medium"
-                            style={{ color: "#94a3b8" }}
-                          >
-                            {col}
-                          </th>
-                        )
-                      )}
+                    <tr style={{ borderBottom: `1px solid ${DARK_BORDER}` }}>
+                      {["User", "Conversations", "Hours Saved", "Dollar Value", "Tier"].map((col) => (
+                        <th
+                          key={col}
+                          className="px-5 py-3 text-left font-semibold uppercase tracking-widest"
+                          style={{ color: "#666666", fontSize: 11 }}
+                        >
+                          {col}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
@@ -349,31 +325,26 @@ export default async function ProductivityPage() {
                       <tr
                         key={u.userId}
                         style={{
-                          backgroundColor: i % 2 === 0 ? "transparent" : "#0f0f18",
-                          borderBottom: "1px solid #1e1e2e",
+                          borderBottom: `1px solid ${i < sortedUsers.length - 1 ? "#1A1A1A" : "transparent"}`,
+                          transition: "background 0.1s",
                         }}
-                        className="hover:bg-[#1a1a26] transition-colors"
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                       >
-                        <td className="px-4 py-3">
-                          <div>
-                            <p className="font-medium" style={{ color: "#f1f5f9" }}>
-                              {u.name ?? u.email.split("@")[0]}
-                            </p>
-                            <p className="text-xs" style={{ color: "#94a3b8" }}>
-                              {u.email}
-                            </p>
-                          </div>
+                        <td className="px-5 py-3">
+                          <p className="font-semibold text-white">{u.name ?? u.email.split("@")[0]}</p>
+                          <p className="text-xs mt-0.5" style={{ color: "#666666" }}>{u.email}</p>
                         </td>
-                        <td className="px-4 py-3" style={{ color: "#f1f5f9" }}>
+                        <td className="px-5 py-3 tabular-nums" style={{ color: "#999999" }}>
                           {u.conversations.toLocaleString()}
                         </td>
-                        <td className="px-4 py-3 font-mono" style={{ color: "#f1f5f9" }}>
+                        <td className="px-5 py-3 tabular-nums font-medium text-white">
                           {u.hoursSaved.toFixed(1)} hrs
                         </td>
-                        <td className="px-4 py-3 font-mono" style={{ color: "#10a37f" }}>
+                        <td className="px-5 py-3 tabular-nums font-semibold" style={{ color: "#4ADE80" }}>
                           {formatCost(u.dollarValue)}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-5 py-3">
                           <TierBadge tier={u.tier} />
                         </td>
                       </tr>
@@ -385,67 +356,56 @@ export default async function ProductivityPage() {
           </TabsContent>
 
           {/* Methodology Tab */}
-          <TabsContent value="methodology" className="p-4 pt-2 space-y-6">
+          <TabsContent value="methodology" className="p-6 space-y-4">
             <div
-              className="rounded-lg p-4 space-y-3"
-              style={{ backgroundColor: "#0a0a0f", border: "1px solid #2a2a3a" }}
+              className="rounded-lg p-5 space-y-3"
+              style={{ backgroundColor: "#0A0A0A", border: `1px solid ${DARK_BORDER}` }}
             >
-              <h3 className="text-sm font-semibold" style={{ color: "#f1f5f9" }}>
-                How Productivity is Calculated
-              </h3>
-              <p className="text-sm leading-relaxed" style={{ color: "#94a3b8" }}>
+              <p className="text-sm font-semibold text-white">How Productivity is Calculated</p>
+              <p className="text-sm leading-relaxed" style={{ color: "#999999" }}>
                 Each user&apos;s AI usage is analyzed over the last 30 days. Conversations are
                 estimated from total token count (min 500 tokens per conversation) and request
                 count, taking the higher of the two estimates.
               </p>
-              <p className="text-sm leading-relaxed" style={{ color: "#94a3b8" }}>
+              <p className="text-sm leading-relaxed" style={{ color: "#999999" }}>
                 Conversations are classified by average tokens per conversation:
               </p>
-              <ul className="text-sm space-y-1" style={{ color: "#94a3b8" }}>
+              <ul className="text-sm space-y-1.5" style={{ color: "#999999" }}>
                 <li>
-                  <span className="font-medium" style={{ color: "#f1f5f9" }}>Simple</span>
+                  <span className="font-medium text-white">Simple</span>
                   {" "}(&lt; 2,000 tokens avg) &rarr;{" "}
-                  <span style={{ color: "#10a37f" }}>{config.minutesSavedSimple} min saved</span>
+                  <span style={{ color: APRICOT }}>{config.minutesSavedSimple} min saved</span>
                 </li>
                 <li>
-                  <span className="font-medium" style={{ color: "#f1f5f9" }}>Moderate</span>
+                  <span className="font-medium text-white">Moderate</span>
                   {" "}(2,000–10,000 tokens avg) &rarr;{" "}
-                  <span style={{ color: "#3b82f6" }}>{config.minutesSavedModerate} min saved</span>
+                  <span style={{ color: "#D4856A" }}>{config.minutesSavedModerate} min saved</span>
                 </li>
                 <li>
-                  <span className="font-medium" style={{ color: "#f1f5f9" }}>Complex</span>
+                  <span className="font-medium text-white">Complex</span>
                   {" "}(&gt; 10,000 tokens avg) &rarr;{" "}
-                  <span style={{ color: "#6366f1" }}>{config.minutesSavedComplex} min saved</span>
+                  <span style={{ color: TERRACOTTA }}>{config.minutesSavedComplex} min saved</span>
                 </li>
               </ul>
-              <p className="text-sm" style={{ color: "#94a3b8" }}>
+              <p className="text-sm" style={{ color: "#999999" }}>
                 Dollar value = Hours Saved &times; Hourly Rate (${config.hourlyRate}/hr).
                 ROI = Dollar Value &divide; Total AI Cost.
               </p>
             </div>
 
-            {/* Config values */}
             {configRecords.length > 0 && (
-              <div
-                className="rounded-lg overflow-hidden"
-                style={{ border: "1px solid #2a2a3a" }}
-              >
-                <div
-                  className="px-4 py-3 border-b"
-                  style={{ backgroundColor: "#12121a", borderColor: "#2a2a3a" }}
-                >
-                  <p className="text-sm font-semibold" style={{ color: "#f1f5f9" }}>
-                    Current Configuration
-                  </p>
+              <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${DARK_BORDER}` }}>
+                <div className="px-5 py-3" style={{ borderBottom: `1px solid ${DARK_BORDER}` }}>
+                  <p className="text-sm font-semibold text-white">Current Configuration</p>
                 </div>
                 <table className="w-full text-sm">
                   <thead>
-                    <tr style={{ borderBottom: "1px solid #2a2a3a", backgroundColor: "#12121a" }}>
+                    <tr style={{ borderBottom: `1px solid ${DARK_BORDER}` }}>
                       {["Key", "Label", "Value", "Description"].map((h) => (
                         <th
                           key={h}
-                          className="px-4 py-2.5 text-left font-medium"
-                          style={{ color: "#94a3b8" }}
+                          className="px-5 py-3 text-left font-semibold uppercase tracking-widest"
+                          style={{ color: "#666666", fontSize: 11 }}
                         >
                           {h}
                         </th>
@@ -457,20 +417,17 @@ export default async function ProductivityPage() {
                       <tr
                         key={r.id}
                         style={{
-                          backgroundColor: i % 2 === 0 ? "#0a0a0f" : "#0f0f18",
-                          borderBottom: "1px solid #1e1e2e",
+                          borderBottom: `1px solid ${i < configRecords.length - 1 ? "#1A1A1A" : "transparent"}`,
                         }}
                       >
-                        <td className="px-4 py-3 font-mono text-xs" style={{ color: "#94a3b8" }}>
+                        <td className="px-5 py-3 font-mono text-xs" style={{ color: "#666666" }}>
                           {r.key}
                         </td>
-                        <td className="px-4 py-3" style={{ color: "#f1f5f9" }}>
-                          {r.label}
-                        </td>
-                        <td className="px-4 py-3 font-mono font-semibold" style={{ color: "#10a37f" }}>
+                        <td className="px-5 py-3 text-white">{r.label}</td>
+                        <td className="px-5 py-3 font-mono font-semibold" style={{ color: APRICOT }}>
                           {r.value}
                         </td>
-                        <td className="px-4 py-3 text-xs" style={{ color: "#94a3b8" }}>
+                        <td className="px-5 py-3 text-xs" style={{ color: "#666666" }}>
                           {r.description ?? "—"}
                         </td>
                       </tr>

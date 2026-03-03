@@ -1,11 +1,7 @@
 "use client";
 
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -19,28 +15,13 @@ interface ModelDistributionProps {
   loading?: boolean;
 }
 
-// Terracotta shades for ChatGPT models
-const CHATGPT_COLORS = [
-  "#A64A30",
-  "#8B3D26",
-  "#70301D",
-  "#552414",
-  "#3A180D",
-];
-
-// Apricot shades for Claude models
-const CLAUDE_COLORS = [
-  "#F6D1A3",
-  "#E8BB80",
-  "#DAA55D",
-  "#CC8F3A",
-  "#BE7917",
-];
+// ChatGPT models → apricot/warm light shades
+const CHATGPT_COLORS = ["#F6D1A3", "#E8B87A", "#D4856A", "#C07050", "#AC5C36"];
+// Claude models → terracotta/warm dark shades
+const CLAUDE_COLORS  = ["#A64A30", "#8B3D26", "#C97A55", "#B06040", "#70301D"];
 
 function getModelColor(platform: string, index: number): string {
-  if (platform === "chatgpt") {
-    return CHATGPT_COLORS[index % CHATGPT_COLORS.length];
-  }
+  if (platform === "chatgpt") return CHATGPT_COLORS[index % CHATGPT_COLORS.length];
   return CLAUDE_COLORS[index % CLAUDE_COLORS.length];
 }
 
@@ -59,8 +40,7 @@ function formatModelName(model: string): string {
 }
 
 function CustomTooltip({
-  active,
-  payload,
+  active, payload,
 }: {
   active?: boolean;
   payload?: Array<{ name: string; value: number; payload: { model: string; platform: string; tokens: number; percentage: number; color: string } }>;
@@ -71,12 +51,10 @@ function CustomTooltip({
   return (
     <div
       className="rounded-lg p-3 text-xs shadow-xl"
-      style={{ backgroundColor: "#111111", border: "1px solid #A64A3044" }}
+      style={{ backgroundColor: "#0A0A0A", border: "1px solid #2A2A2A" }}
     >
-      <p className="font-semibold text-white mb-1">
-        {formatModelName(item.model)}
-      </p>
-      <p style={{ color: "#6a6a6a" }}>
+      <p className="font-semibold text-white mb-1">{formatModelName(item.model)}</p>
+      <p style={{ color: "#666666" }}>
         {item.percentage.toFixed(1)}% &middot; {formatTokens(item.tokens)} tokens
       </p>
     </div>
@@ -84,19 +62,16 @@ function CustomTooltip({
 }
 
 export function ModelDistribution({ data, loading = false }: ModelDistributionProps) {
-  if (loading) {
-    return <Skeleton className="w-full h-[300px] bg-[#1a1a1a]" />;
-  }
+  if (loading) return <Skeleton className="w-full h-[300px] bg-[#1A1A1A]" />;
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[300px] text-sm" style={{ color: "#6a6a6a" }}>
+      <div className="flex items-center justify-center h-[300px] text-sm" style={{ color: "#666666" }}>
         No model data available
       </div>
     );
   }
 
-  // Track per-platform index for color assignment
   const platformCounters: Record<string, number> = {};
   const coloredData = data.map((item) => {
     const idx = platformCounters[item.platform] ?? 0;
@@ -106,7 +81,7 @@ export function ModelDistribution({ data, loading = false }: ModelDistributionPr
 
   return (
     <div className="flex flex-col gap-4">
-      <ResponsiveContainer width="100%" height={220}>
+      <ResponsiveContainer width="100%" height={200}>
         <PieChart>
           <Pie
             data={coloredData}
@@ -114,42 +89,32 @@ export function ModelDistribution({ data, loading = false }: ModelDistributionPr
             nameKey="model"
             cx="50%"
             cy="50%"
-            innerRadius={60}
-            outerRadius={100}
-            strokeWidth={2}
-            stroke="#080808"
+            innerRadius={50}
+            outerRadius={80}
+            paddingAngle={2}
+            strokeWidth={0}
           >
             {coloredData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
+              <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
             ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />
         </PieChart>
       </ResponsiveContainer>
 
-      {/* Legend */}
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 px-2">
+      <div className="flex flex-col gap-1.5 px-1">
         {coloredData.map((item) => (
-          <li
-            key={item.model}
-            className="flex items-center gap-2 text-xs"
-          >
-            <span
-              className="inline-block w-2.5 h-2.5 rounded-sm flex-shrink-0"
-              style={{ backgroundColor: item.color }}
-            />
-            <span className="text-white truncate flex-1">
-              {formatModelName(item.model)}
+          <div key={item.model} className="flex items-center justify-between text-xs">
+            <span className="flex items-center gap-2" style={{ color: "#999999" }}>
+              <span className="inline-block w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: item.color }} />
+              <span className="truncate">{formatModelName(item.model)}</span>
             </span>
-            <span className="flex-shrink-0" style={{ color: "#6a6a6a" }}>
-              {item.percentage.toFixed(1)}%
+            <span className="text-white font-medium flex-shrink-0 ml-2">
+              {item.tokens.toLocaleString()}
             </span>
-            <span className="flex-shrink-0 hidden sm:block" style={{ color: "#6a6a6a" }}>
-              {formatTokens(item.tokens)}
-            </span>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
