@@ -11,6 +11,7 @@
     "seed:ai": "npx tsx scripts/seed-demo-data.ts",
     "seed:hubspot": "npx tsx scripts/seed-hubspot-demo.ts",
     "seed:all": "npm run seed:ai && npm run seed:hubspot",
+    "clear:demo": "npx tsx scripts/clear-demo-data.ts",
     "db:push": "npx prisma db push",
     "db:generate": "npx prisma generate",
     "db:studio": "npx prisma studio",
